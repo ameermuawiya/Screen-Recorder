@@ -1,0 +1,33 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <!-- Samsung OneUI screen recorder icon: camcorder inside corner brackets -->
+
+  <!-- Corner bracket: top-left -->
+  <path
+      android:fillColor="#FFffffff"
+      android:pathData="M2,2 L7,2 L7,3.5 L3.5,3.5 L3.5,7 L2,7 Z"/>
+  <!-- Corner bracket: top-right -->
+  <path
+      android:fillColor="#FFffffff"
+      android:pathData="M22,2 L17,2 L17,3.5 L20.5,3.5 L20.5,7 L22,7 Z"/>
+  <!-- Corner bracket: bottom-left -->
+  <path
+      android:fillColor="#FFffffff"
+      android:pathData="M2,22 L7,22 L7,20.5 L3.5,20.5 L3.5,17 L2,17 Z"/>
+  <!-- Corner bracket: bottom-right -->
+  <path
+      android:fillColor="#FFffffff"
+      android:pathData="M22,22 L17,22 L17,20.5 L20.5,20.5 L20.5,17 L22,17 Z"/>
+
+  <!-- Camcorder body -->
+  <path
+      android:fillColor="#FFffffff"
+      android:pathData="M15,8H7C6.45,8 6,8.45 6,9v6c0,0.55 0.45,1 1,1h8c0.55,0 1,-0.45 1,-1V9C16,8.45 15.55,8 15,8z"/>
+  <!-- Camcorder lens -->
+  <path
+      android:fillColor="#FFffffff"
+      android:pathData="M17,10l2.5,-1.5v7L17,14z"/>
+</vector>
