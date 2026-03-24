@@ -8,12 +8,15 @@ import android.app.Service
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.MediaRecorder
+import android.media.MediaScannerConnection
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.Handler
@@ -23,6 +26,7 @@ import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import java.io.File
 import java.text.SimpleDateFormat
@@ -35,6 +39,7 @@ class ScreenRecordService : Service() {
         const val TAG = "ScreenRecordService"
         const val CHANNEL_ID = "screen_record_channel"
         const val NOTIFICATION_ID = 1
+        const val NOTIFICATION_ID_DONE = 2
         const val ACTION_START = "com.haseeb.recorder.ACTION_START"
         const val ACTION_STOP = "com.haseeb.recorder.ACTION_STOP"
         const val ACTION_TOGGLE_MIC = "com.haseeb.recorder.ACTION_TOGGLE_MIC"
@@ -48,10 +53,7 @@ class ScreenRecordService : Service() {
         var isMicEnabled = true
         var isInternalAudioEnabled = true
 
-        // Direct callback for overlay icon updates (replaces unreliable broadcasts)
-        interface AudioStateListener {
-            fun onAudioStateChanged()
-        }
+        interface AudioStateListener { fun onAudioStateChanged() }
         var audioStateListener: AudioStateListener? = null
     }
 
@@ -63,10 +65,8 @@ class ScreenRecordService : Service() {
     private var screenWidth = 0
     private var screenHeight = 0
     private var screenDensity = 0
-
     private var outputFilePath: String = ""
 
-    // Required callback for Android 14+ before createVirtualDisplay()
     private val projectionCallback = object : MediaProjection.Callback() {
         override fun onStop() {
             Log.d(TAG, "MediaProjection stopped by system")
@@ -90,6 +90,9 @@ class ScreenRecordService : Service() {
         wm.defaultDisplay.getRealMetrics(metrics)
         screenWidth = metrics.widthPixels
         screenHeight = metrics.heightPixels
+        // H.264 strictly requires even dimensions
+        if (screenWidth % 2 != 0) screenWidth--
+        if (screenHeight % 2 != 0) screenHeight--
         screenDensity = metrics.densityDpi
     }
 
@@ -103,18 +106,12 @@ class ScreenRecordService : Service() {
                     @Suppress("DEPRECATION")
                     intent.getParcelableExtra(EXTRA_DATA)
                 }
-
                 if (data != null) {
-                    // MUST call startForeground with mediaProjection type BEFORE
-                    // getMediaProjection() on Android 14+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        startForeground(
-                            NOTIFICATION_ID,
-                            buildNotification(),
-                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-                        )
+                        startForeground(NOTIFICATION_ID, buildRecordingNotification(),
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
                     } else {
-                        startForeground(NOTIFICATION_ID, buildNotification())
+                        startForeground(NOTIFICATION_ID, buildRecordingNotification())
                     }
                     startRecording(resultCode, data)
                 }
@@ -126,12 +123,10 @@ class ScreenRecordService : Service() {
             }
             ACTION_TOGGLE_MIC -> {
                 isMicEnabled = !isMicEnabled
-                Log.d(TAG, "Mic toggled: $isMicEnabled")
                 audioStateListener?.onAudioStateChanged()
             }
             ACTION_TOGGLE_INTERNAL_AUDIO -> {
                 isInternalAudioEnabled = !isInternalAudioEnabled
-                Log.d(TAG, "Internal audio toggled: $isInternalAudioEnabled")
                 audioStateListener?.onAudioStateChanged()
             }
         }
@@ -141,21 +136,17 @@ class ScreenRecordService : Service() {
     private fun startRecording(resultCode: Int, data: Intent) {
         val projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         mediaProjection = projectionManager.getMediaProjection(resultCode, data)
-
-        // Android 14+ REQUIRES registering a callback BEFORE createVirtualDisplay()
         mediaProjection?.registerCallback(projectionCallback, mainHandler)
 
-        // Prepare output file
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val fileName = "ScreenRecord_$timestamp.mp4"
 
-        val moviesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-        val recorderDir = File(moviesDir, "ScreenRecorder")
+        val dcimDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+        val recorderDir = File(dcimDir, "ScreenRecorder")
         if (!recorderDir.exists()) recorderDir.mkdirs()
         val outputFile = File(recorderDir, fileName)
         outputFilePath = outputFile.absolutePath
 
-        // Set up MediaRecorder
         mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaRecorder(this)
         } else {
@@ -163,119 +154,145 @@ class ScreenRecordService : Service() {
             MediaRecorder()
         }
 
-        mediaRecorder?.apply {
-            if (isMicEnabled) {
-                setAudioSource(MediaRecorder.AudioSource.MIC)
+        val hasMicPermission = checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        val actuallyRecordMic = isMicEnabled && hasMicPermission
+
+        try {
+            mediaRecorder?.apply {
+                if (actuallyRecordMic) setAudioSource(MediaRecorder.AudioSource.MIC)
+                setVideoSource(MediaRecorder.VideoSource.SURFACE)
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                setVideoEncoder(MediaRecorder.VideoEncoder.H264)
+                if (actuallyRecordMic) {
+                    setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                    setAudioEncodingBitRate(128000)
+                    setAudioSamplingRate(44100)
+                }
+                setVideoSize(screenWidth, screenHeight)
+                setVideoFrameRate(60)
+                setVideoEncodingBitRate(8_000_000)
+                setOutputFile(outputFilePath)
+                prepare()
             }
-            setVideoSource(MediaRecorder.VideoSource.SURFACE)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-            if (isMicEnabled) {
-                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                setAudioEncodingBitRate(128000)
-                setAudioSamplingRate(44100)
-            }
-            setVideoSize(screenWidth, screenHeight)
-            setVideoFrameRate(60)
-            setVideoEncodingBitRate(8_000_000)
-            setOutputFile(outputFilePath)
-            prepare()
+
+            virtualDisplay = mediaProjection?.createVirtualDisplay(
+                "ScreenRecorder",
+                screenWidth, screenHeight, screenDensity,
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                mediaRecorder?.surface, null, null
+            )
+
+            mediaRecorder?.start()
+            isRecording = true
+            Log.d(TAG, "Recording started → $outputFilePath")
+            startService(Intent(this, RecordingOverlayService::class.java))
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start recording: ${e.message}", e)
+            cleanup()
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
         }
-
-        // Create VirtualDisplay (callback is already registered above)
-        virtualDisplay = mediaProjection?.createVirtualDisplay(
-            "ScreenRecorder",
-            screenWidth, screenHeight, screenDensity,
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            mediaRecorder?.surface,
-            null, null
-        )
-
-        mediaRecorder?.start()
-        isRecording = true
-        Log.d(TAG, "Recording started → $outputFilePath")
-
-        // Show the floating pill overlay
-        val overlayIntent = Intent(this, RecordingOverlayService::class.java)
-        startService(overlayIntent)
     }
 
     private fun stopRecording() {
         if (!isRecording) return
 
-        try {
-            mediaRecorder?.stop()
-        } catch (e: Exception) {
+        try { mediaRecorder?.stop() } catch (e: Exception) {
             Log.e(TAG, "Error stopping MediaRecorder", e)
         }
-        mediaRecorder?.reset()
-        mediaRecorder?.release()
-        mediaRecorder = null
 
-        virtualDisplay?.release()
-        virtualDisplay = null
+        cleanup()
 
-        try {
-            mediaProjection?.unregisterCallback(projectionCallback)
-        } catch (_: Exception) {}
-        mediaProjection?.stop()
-        mediaProjection = null
+        val file = File(outputFilePath)
+        if (file.exists() && file.length() > 0L) {
+            // Trigger MediaScanner so native Gallery picks it up immediately
+            MediaScannerConnection.scanFile(this, arrayOf(outputFilePath), arrayOf("video/mp4")) { _, uri ->
+                Log.d(TAG, "Media scan complete, uri=$uri")
+                mainHandler.post {
+                    // Show toast on main thread
+                    Toast.makeText(this, "Recording saved to DCIM/ScreenRecorder", Toast.LENGTH_LONG).show()
+                    // Show a "Saved" notification that opens the video
+                    if (uri != null) showSavedNotification(file.name, uri)
+                }
+            }
+        } else {
+            file.delete()
+            mainHandler.post {
+                Toast.makeText(this, "Recording failed — no video data captured", Toast.LENGTH_LONG).show()
+            }
+        }
 
         isRecording = false
         Log.d(TAG, "Recording stopped → $outputFilePath")
-
-        // Save to MediaStore for Gallery visibility
-        saveToMediaStore()
-
-        // Stop the floating pill overlay
-        val overlayIntent = Intent(this, RecordingOverlayService::class.java)
-        stopService(overlayIntent)
+        stopService(Intent(this, RecordingOverlayService::class.java))
     }
 
-    private fun saveToMediaStore() {
-        if (outputFilePath.isEmpty()) return
-        val file = File(outputFilePath)
-        if (!file.exists()) return
-
-        val values = ContentValues().apply {
-            put(MediaStore.Video.Media.DISPLAY_NAME, file.name)
-            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-            put(MediaStore.Video.Media.RELATIVE_PATH, "${Environment.DIRECTORY_DCIM}/ScreenRecorder")
-            put(MediaStore.Video.Media.IS_PENDING, 0)
-        }
-        contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
-        Log.d(TAG, "Saved to MediaStore: ${file.name}")
+    private fun cleanup() {
+        mediaRecorder?.reset()
+        mediaRecorder?.release()
+        mediaRecorder = null
+        virtualDisplay?.release()
+        virtualDisplay = null
+        try { mediaProjection?.unregisterCallback(projectionCallback) } catch (_: Exception) {}
+        mediaProjection?.stop()
+        mediaProjection = null
     }
 
-    private fun buildNotification(): Notification {
-        val stopIntent = Intent(this, ScreenRecordService::class.java).apply {
-            action = ACTION_STOP
-        }
+    /** Notification visible during recording with a Stop button. */
+    private fun buildRecordingNotification(): Notification {
         val stopPendingIntent = PendingIntent.getService(
-            this, 0, stopIntent,
+            this, 0,
+            Intent(this, ScreenRecordService::class.java).apply { action = ACTION_STOP },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Screen Recording")
-            .setContentText("Tap to stop recording")
+            .setContentText("Tap Stop to finish")
             .setSmallIcon(R.drawable.ic_screen_record)
             .setOngoing(true)
-            .addAction(R.drawable.ic_screen_record, "Stop", stopPendingIntent)
+            .addAction(R.drawable.ic_stop, "Stop", stopPendingIntent)
             .setContentIntent(stopPendingIntent)
             .build()
     }
 
+    /** Notification shown after recording saved — click to open in video player. */
+    private fun showSavedNotification(fileName: String, videoUri: Uri) {
+        val playIntent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(videoUri, "video/mp4")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val pendingPlay = PendingIntent.getActivity(
+            this, 3, playIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Also add "Open app" action
+        val openAppIntent = Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val pendingApp = PendingIntent.getActivity(
+            this, 4, openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Recording saved")
+            .setContentText(fileName)
+            .setSmallIcon(R.drawable.ic_screen_record)
+            .setAutoCancel(true)
+            .setContentIntent(pendingPlay)   // Tap notification → play video
+            .addAction(R.drawable.ic_screen_record, "Open App", pendingApp)
+            .build()
+
+        val nm = getSystemService(NotificationManager::class.java)
+        nm.notify(NOTIFICATION_ID_DONE, notification)
+    }
+
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Screen Recording",
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
+        val channel = NotificationChannel(CHANNEL_ID, "Screen Recording", NotificationManager.IMPORTANCE_LOW).apply {
             description = "Active screen recording notification"
         }
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(channel)
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 }
-
