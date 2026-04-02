@@ -19,41 +19,27 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 
 /**
- * Floating overlay during recording — OneUI 8.5 frosted glass pill.
- * Mic and internal audio icons swap between on/off drawables.
- * Uses direct callback from ScreenRecordService (no broadcasts).
+ * Floating overlay during recording — minimal pill with timer + stop button.
  */
-class RecordingOverlayService : Service(), ScreenRecordService.Companion.AudioStateListener {
+class RecordingOverlayService : Service() {
 
     private var windowManager: WindowManager? = null
     private var overlayView: View? = null
-
-    private var micIcon: ImageView? = null
-    private var internalAudioIcon: ImageView? = null
-    private var timerView: Chronometer? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        // Register as the direct listener
-        ScreenRecordService.audioStateListener = this
         createOverlay()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        ScreenRecordService.audioStateListener = null
         if (overlayView != null) {
             windowManager?.removeView(overlayView)
             overlayView = null
         }
-    }
-
-    // Called directly by ScreenRecordService when toggle occurs
-    override fun onAudioStateChanged() {
-        micIcon?.post { updateIconStates() }
     }
 
     private fun dp(value: Int): Int {
@@ -99,7 +85,7 @@ class RecordingOverlayService : Service(), ScreenRecordService.Companion.AudioSt
         pill.addView(redDot)
 
         // ── Timer ───────────────────────────────────────────────────
-        timerView = Chronometer(this).apply {
+        val timerView = Chronometer(this).apply {
             base = SystemClock.elapsedRealtime()
             setTextColor(Color.WHITE)
             textSize = 13f
@@ -112,44 +98,43 @@ class RecordingOverlayService : Service(), ScreenRecordService.Companion.AudioSt
         }
         pill.addView(timerView)
 
-        // ── Divider ─────────────────────────────────────────────────
-        pill.addView(createDivider())
-
-        // ── Mic toggle ──────────────────────────────────────────────
-        micIcon = ImageView(this).apply {
-            updateMicIcon(this)
-            layoutParams = LinearLayout.LayoutParams(dp(22), dp(22)).apply {
-                marginStart = dp(12)
-                marginEnd = dp(8)
+        // ── Pause / Resume button ───────────────────────────────────
+        val pauseBtn = ImageView(this).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.parseColor("#44FFFFFF"))
+            }
+            setImageResource(R.drawable.ic_pause)
+            setColorFilter(Color.WHITE)
+            setPadding(dp(5), dp(5), dp(5), dp(5))
+            layoutParams = LinearLayout.LayoutParams(dp(28), dp(28)).apply {
+                marginStart = dp(8)
             }
             isClickable = true
             isFocusable = true
             setOnClickListener {
-                startService(Intent(this@RecordingOverlayService, ScreenRecordService::class.java).apply {
-                    action = ScreenRecordService.ACTION_TOGGLE_MIC
-                })
+                if (ScreenRecordService.isPaused) {
+                    // Resume
+                    startService(Intent(this@RecordingOverlayService, ScreenRecordService::class.java).apply {
+                        action = ScreenRecordService.ACTION_RESUME
+                    })
+                    setImageResource(R.drawable.ic_pause)
+                    timerView.start()
+                    // Restart red dot pulse
+                    redDot.alpha = 1f
+                } else {
+                    // Pause
+                    startService(Intent(this@RecordingOverlayService, ScreenRecordService::class.java).apply {
+                        action = ScreenRecordService.ACTION_PAUSE
+                    })
+                    setImageResource(R.drawable.ic_play)
+                    timerView.stop()
+                    // Solid red dot while paused
+                    redDot.alpha = 1f
+                }
             }
         }
-        pill.addView(micIcon)
-
-        // ── Internal audio toggle ───────────────────────────────────
-        internalAudioIcon = ImageView(this).apply {
-            updateAudioIcon(this)
-            layoutParams = LinearLayout.LayoutParams(dp(22), dp(22)).apply {
-                marginEnd = dp(12)
-            }
-            isClickable = true
-            isFocusable = true
-            setOnClickListener {
-                startService(Intent(this@RecordingOverlayService, ScreenRecordService::class.java).apply {
-                    action = ScreenRecordService.ACTION_TOGGLE_INTERNAL_AUDIO
-                })
-            }
-        }
-        pill.addView(internalAudioIcon)
-
-        // ── Divider ─────────────────────────────────────────────────
-        pill.addView(createDivider())
+        pill.addView(pauseBtn)
 
         // ── Stop button ─────────────────────────────────────────────
         val stopBtn = ImageView(this).apply {
@@ -224,37 +209,4 @@ class RecordingOverlayService : Service(), ScreenRecordService.Companion.AudioSt
             .setInterpolator(OvershootInterpolator(1.2f))
             .start()
     }
-
-    private fun createDivider(): View {
-        return View(this).apply {
-            setBackgroundColor(Color.parseColor("#33FFFFFF"))
-            layoutParams = LinearLayout.LayoutParams(dp(1), dp(18))
-        }
-    }
-
-    private fun updateMicIcon(iv: ImageView) {
-        if (ScreenRecordService.isMicEnabled) {
-            iv.setImageResource(R.drawable.ic_mic)
-            iv.setColorFilter(Color.WHITE)
-        } else {
-            iv.setImageResource(R.drawable.ic_mic_off)
-            iv.setColorFilter(Color.parseColor("#66FFFFFF"))
-        }
-    }
-
-    private fun updateAudioIcon(iv: ImageView) {
-        if (ScreenRecordService.isInternalAudioEnabled) {
-            iv.setImageResource(R.drawable.ic_internal_audio)
-            iv.setColorFilter(Color.WHITE)
-        } else {
-            iv.setImageResource(R.drawable.ic_internal_audio_off)
-            iv.setColorFilter(Color.parseColor("#66FFFFFF"))
-        }
-    }
-
-    private fun updateIconStates() {
-        micIcon?.let { updateMicIcon(it) }
-        internalAudioIcon?.let { updateAudioIcon(it) }
-    }
 }
-

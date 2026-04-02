@@ -17,40 +17,63 @@
 
         <TextView
             android:id="@+id/mainTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-black"
             android:text="Recordings"
             android:textColor="?attr/colorOnSurface"
             android:textSize="32sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnInfo" />
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@null"
-            android:src="@android:drawable/ic_menu_search"
-            app:layout_constraintBottom_toBottomOf="@id/mainTitle"
+        <ImageButton
+            android:id="@+id/btnInfo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_info"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            app:tint="?attr/colorOnSurfaceVariant"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/mainTitle"
-            app:tint="?attr/colorOutline" />
-
-        <TextView
-            android:id="@+id/subtitleText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="16dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="0 videos captured"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/mainTitle" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/mainTitle" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/tabPillContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            app:tabMode="fixed"
+            app:tabGravity="center"
+            app:tabPaddingStart="24dp"
+            app:tabPaddingEnd="24dp"
+            app:tabMinWidth="0dp"
+            app:tabBackground="@android:color/transparent"
+            app:tabRippleColor="@android:color/transparent"
+            app:tabIndicator="@drawable/tab_indicator_pill"
+            app:tabIndicatorAnimationMode="elastic"
+            app:tabIndicatorFullWidth="true"
+            app:tabIndicatorHeight="40dp"
+            app:tabIndicatorGravity="center"
+            app:tabIndicatorColor="?attr/colorPrimary"
+            app:tabTextColor="?attr/colorOnSurfaceVariant"
+            app:tabSelectedTextColor="?attr/colorOnPrimary"
+            app:tabTextAppearance="@style/TextAppearance.MaterialComponents.Button"
+            style="@style/Widget.Material3.TabLayout" />
+    </com.google.android.material.card.MaterialCardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -59,8 +82,9 @@
         android:clipToPadding="false"
         android:paddingTop="8dp"
         android:paddingBottom="100dp"
+        android:layoutAnimation="@anim/layout_animation"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerLayout" />
+        app:layout_constraintTop_toBottomOf="@id/tabPillContainer" />
 
     <LinearLayout
         android:id="@+id/emptyView"
@@ -70,7 +94,7 @@
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+        app:layout_constraintTop_toBottomOf="@id/tabPillContainer">
 
         <TextView
             android:layout_width="wrap_content"
@@ -81,16 +105,55 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabRecord"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomControlBar"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
+        android:layout_height="64dp"
         android:layout_marginBottom="32dp"
-        android:src="@drawable/ic_screen_record"
-        app:backgroundTint="?attr/colorPrimaryContainer"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="?attr/colorOnPrimaryContainer" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingHorizontal="16dp">
+
+            <ImageButton
+                android:id="@+id/btnToggleMic"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_mic"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:tint="?attr/colorOnSurface"
+                android:contentDescription="Toggle Mic" />
+
+            <ImageButton
+                android:id="@+id/btnToggleSystemAudio"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_audio"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:tint="?attr/colorOnSurface"
+                android:contentDescription="Toggle System Audio" />
+
+            <ImageButton
+                android:id="@+id/fabRecord"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_screen_record"
+                android:background="@drawable/bg_record_btn_round"
+                app:tint="?attr/colorOnPrimary"
+                android:contentDescription="Record" />
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

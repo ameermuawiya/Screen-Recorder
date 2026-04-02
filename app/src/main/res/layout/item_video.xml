@@ -6,111 +6,105 @@
      android:layout_height="wrap_content"
      android:layout_width="match_parent"
      android:layout_marginVertical="12dp"
-     android:layout_marginHorizontal="24dp"
-     app:cardElevation="0dp"
-     app:cardBackgroundColor="?attr/colorSurfaceVariant"
-     app:cardCornerRadius="16dp">
+     android:layout_marginHorizontal="16dp"
+     app:cardElevation="8dp"
+     app:cardCornerRadius="24dp">
 
-    <LinearLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:orientation="vertical">
+    <androidx.constraintlayout.widget.ConstraintLayout
+         android:layout_height="250dp"
+         android:layout_width="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-             android:layout_height="220dp"
-             android:layout_width="match_parent">
-
-            <ImageView
-                 android:layout_height="match_parent"
-                 android:layout_width="match_parent"
-                 android:scaleType="centerCrop"
-                 android:background="?attr/colorSurfaceContainerHighest"
-                 android:id="@+id/thumbnail" />
-
-            <View
-                 android:layout_height="match_parent"
-                 android:layout_width="match_parent"
-                 android:background="#22000000" />
-
-            <ImageView
-                 android:layout_height="64dp"
-                 android:layout_width="64dp"
-                 android:scaleType="centerInside"
-                 android:src="@android:drawable/ic_media_play"
-                 android:background="@drawable/play_bg"
-                 app:layout_constraintTop_toTopOf="parent"
-                 app:tint="?attr/colorSurface"
-                 app:layout_constraintStart_toStartOf="parent"
-                 android:backgroundTint="?attr/colorOnSurface"
-                 app:layout_constraintEnd_toEndOf="parent"
-                 app:layout_constraintBottom_toBottomOf="parent" />
-
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:layout_marginEnd="12dp"
-                 android:textSize="11sp"
-                 android:textColor="?attr/colorOnSurface"
-                 app:layout_constraintBottom_toBottomOf="parent"
-                 tools:text="04:22"
-                 android:layout_marginBottom="12dp"
-                 android:background="@drawable/bg_duration_pill"
-                 android:paddingVertical="4dp"
-                 android:fontFamily="sans-serif-medium"
-                 app:layout_constraintEnd_toEndOf="parent"
-                 android:paddingHorizontal="8dp"
-                 android:id="@+id/durationText" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-             android:layout_height="wrap_content"
+        <ImageView
+             android:layout_height="match_parent"
              android:layout_width="match_parent"
-             android:paddingVertical="18dp"
-             android:paddingHorizontal="20dp">
+             android:scaleType="centerCrop"
+             android:background="#1A1A1A"
+             android:id="@+id/thumbnail" />
 
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="0dp"
-                 app:layout_constraintTop_toTopOf="parent"
-                 android:ellipsize="end"
-                 app:layout_constraintStart_toStartOf="parent"
-                 android:fontFamily="sans-serif-bold"
-                 android:textSize="17sp"
-                 android:textColor="?attr/colorOnSurface"
-                 app:layout_constraintEnd_toStartOf="@id/btnMenu"
-                 tools:text="Product Showcase Demo"
-                 android:maxLines="1"
-                 android:id="@+id/titleText" />
+        <!-- Gradient overlay -->
+        <View
+             android:layout_height="120dp"
+             android:layout_width="match_parent"
+             android:background="@drawable/gradient_bottom"
+             app:layout_constraintBottom_toBottomOf="parent" />
 
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="0dp"
-                 app:layout_constraintStart_toStartOf="parent"
-                 android:fontFamily="sans-serif-medium"
-                 android:textSize="11sp"
-                 android:textColor="?attr/colorOnSurfaceVariant"
-                 app:layout_constraintEnd_toStartOf="@id/btnMenu"
-                 android:layout_marginTop="6dp"
-                 tools:text="OCT 24, 2023  •  124 MB"
-                 android:letterSpacing="0.06"
-                 app:layout_constraintTop_toBottomOf="@id/titleText"
-                 android:id="@+id/dateSizeText" />
+        <!-- Duration pill -->
+        <TextView
+             android:id="@+id/durationText"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:layout_margin="16dp"
+             android:textSize="12sp"
+             android:textColor="#FFFFFF"
+             android:background="@drawable/bg_duration_pill"
+             android:paddingVertical="4dp"
+             android:paddingHorizontal="8dp"
+             android:fontFamily="sans-serif-medium"
+             app:layout_constraintTop_toTopOf="parent"
+             app:layout_constraintEnd_toEndOf="parent"
+             tools:text="04:22" />
 
-            <ImageButton
-                 android:layout_height="32dp"
-                 android:layout_width="32dp"
-                 android:contentDescription="More options"
-                 android:src="@android:drawable/ic_menu_more"
-                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                 app:layout_constraintTop_toTopOf="parent"
-                 app:tint="?attr/colorOnSurfaceVariant"
-                 app:layout_constraintEnd_toEndOf="parent"
-                 app:layout_constraintBottom_toBottomOf="parent"
-                 android:id="@+id/btnMenu" />
+        <!-- Title -->
+        <TextView
+             android:id="@+id/titleText"
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             android:layout_marginHorizontal="16dp"
+             android:layout_marginBottom="4dp"
+             android:ellipsize="end"
+             android:fontFamily="sans-serif-medium"
+             android:textSize="18sp"
+             android:textColor="#FFFFFF"
+             android:maxLines="1"
+             app:layout_constraintBottom_toTopOf="@id/dateSizeText"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintEnd_toStartOf="@id/btnMenu"
+             tools:text="Product Showcase Demo" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Date / Size -->
+        <TextView
+             android:id="@+id/dateSizeText"
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             android:layout_marginHorizontal="16dp"
+             android:layout_marginBottom="16dp"
+             android:fontFamily="sans-serif"
+             android:textSize="12sp"
+             android:textColor="#B3FFFFFF"
+             android:letterSpacing="0.03"
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintEnd_toStartOf="@id/btnMenu"
+             tools:text="OCT 24, 2023  •  124 MB" />
 
-    </LinearLayout>
+        <!-- Menu Button -->
+        <ImageButton
+             android:id="@+id/btnMenu"
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:layout_marginEnd="8dp"
+             android:layout_marginBottom="16dp"
+             android:contentDescription="More options"
+             android:src="@android:drawable/ic_menu_more"
+             android:background="?android:attr/selectableItemBackgroundBorderless"
+             app:tint="#FFFFFF"
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Centered Play Icon -->
+        <ImageView
+             android:layout_height="64dp"
+             android:layout_width="64dp"
+             android:scaleType="centerInside"
+             android:src="@android:drawable/ic_media_play"
+             android:background="@drawable/play_bg"
+             app:tint="#FFFFFF"
+             android:backgroundTint="#40000000"
+             app:layout_constraintTop_toTopOf="parent"
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

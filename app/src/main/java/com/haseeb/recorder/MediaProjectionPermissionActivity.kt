@@ -32,6 +32,10 @@ class MediaProjectionPermissionActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        ScreenRecordService.isMicEnabled = intent.getBooleanExtra("RECORD_MIC", true)
+        ScreenRecordService.isInternalAudioEnabled = intent.getBooleanExtra("RECORD_SYSTEM_AUDIO", true)
+
         // This activity has no layout — it's transparent
         checkAndRequestPermissions()
     }
@@ -90,13 +94,15 @@ class MediaProjectionPermissionActivity : Activity() {
 
         if (requestCode == REQUEST_MEDIA_PROJECTION) {
             if (resultCode == RESULT_OK && data != null) {
-                // Start 3-second countdown then launch service
-                Toast.makeText(this, "Recording starts in 3…", Toast.LENGTH_SHORT).show()
+                // Inflate the countdown layout so the user sees a large countdown
+                setContentView(R.layout.activity_countdown)
+                val tvCountdown = findViewById<android.widget.TextView>(R.id.tvCountdown)
+                tvCountdown.text = "3"
 
                 object : CountDownTimer(3000, 1000) {
                     override fun onTick(millisUntilFinished: Long) {
                         val seconds = (millisUntilFinished / 1000) + 1
-                        // Countdown shown via toasts for simplicity
+                        tvCountdown.text = seconds.toString()
                     }
 
                     override fun onFinish() {
