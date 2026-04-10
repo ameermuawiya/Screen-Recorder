@@ -6,12 +6,10 @@
   <p float="left" align="center">
     <img src="app/screenshots/Screenshot_20260402_225809_One%20UI%20Home.jpg" alt="Material You Icon" width="200" style="border-radius: 12px; margin: 4px;" />
     <img src="app/screenshots/Screenshot_20260402_225832_One%20UI%20Home.jpg" alt="App Drawer" width="200" style="border-radius: 12px; margin: 4px;" />
-    <img src="app/screenshots/Screenshot_20260402_225855_Screen%20Recorder.jpg" alt="Main Screen" width="200" style="border-radius: 12px; margin: 4px;" />
+    <img src="app/screenshots/New%20APP%20Ui.jpeg" alt="Main Screen" width="200" style="border-radius: 12px; margin: 4px;" />
     <img src="app/screenshots/Screenshot_20260402_225859_Screen%20Recorder.jpg" alt="About Screen" width="200" style="border-radius: 12px; margin: 4px;" />
   </p>
   <p float="left" align="center">
-    <img src="app/screenshots/Screenshot_20260402_225912_Screen%20Recorder.jpg" alt="Recording Controls" width="200" style="border-radius: 12px; margin: 4px;" />
-    <img src="app/screenshots/Quick%20panel.jpg" alt="Quick Panel" width="200" style="border-radius: 12px; margin: 4px;" />
     <img src="app/screenshots/Screenshot_20260323_160141_One%20UI%20Home.jpg" alt="Recording Pill Active" width="200" style="border-radius: 12px; margin: 4px;" />
     <img src="app/screenshots/Screenshot_20260323_160154_One%20UI%20Home.jpg" alt="Recording Complete" width="200" style="border-radius: 12px; margin: 4px;" />
   </p>

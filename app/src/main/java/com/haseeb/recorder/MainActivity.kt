@@ -17,16 +17,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.tabs.TabLayout
 import com.haseeb.recorder.databinding.ActivityMainBinding
-import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
         const val REQUEST_PERMISSIONS = 2001
-        private const val TAB_ALL = 0
-        private const val TAB_RECENTS = 1
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -34,7 +30,6 @@ class MainActivity : AppCompatActivity() {
     private var useMic = false
     private var useSystemAudio = false
     private var allVideos = listOf<VideoFile>()
-    private var currentTab = TAB_ALL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,13 +39,14 @@ class MainActivity : AppCompatActivity() {
         adapter = VideoAdapter(
             onPlayClick = ::playVideo,
             onRenameClick = ::renameVideo,
-            onDeleteClick = ::deleteVideo
+            onDeleteClick = ::deleteVideo,
+            onShareClick = ::shareVideo
         )
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
 
-        // ── Tabs ──────────────────────────────────────────────────
-        setupTabs()
+        // ── Apply system accent color to header title & record button ──
+        applySystemAccent()
 
         // ── Info Button ───────────────────────────────────────────
         binding.btnInfo.setOnClickListener {
@@ -93,7 +89,7 @@ class MainActivity : AppCompatActivity() {
 
         requestPerms()
 
-        // ── FAB entrance animation ────────────────────────────────
+        // ── Pill entrance animation ──────────────────────────────
         binding.bottomControlBar.translationY = 200f
         binding.bottomControlBar.alpha = 0f
         binding.bottomControlBar.animate()
@@ -106,33 +102,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    //  TABS
+    //  SYSTEM ACCENT
     // ═══════════════════════════════════════════════════════════════
-    private fun setupTabs() {
-        binding.tabLayout.addTab(binding.tabLayout.newTab().setText("All"))
-        binding.tabLayout.addTab(binding.tabLayout.newTab().setText("Recents"))
-
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                currentTab = tab?.position ?: TAB_ALL
-                applyFilter()
-                binding.recyclerView.scheduleLayoutAnimation()
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
-    }
-
-    private fun applyFilter() {
-        val filtered = when (currentTab) {
-            TAB_RECENTS -> {
-                val past48Hours = System.currentTimeMillis() / 1000 - (48 * 60 * 60)
-                allVideos.filter { it.dateAdded >= past48Hours }
-            }
-            else -> allVideos
+    private fun applySystemAccent() {
+        // On Android 12+, use the system dynamic accent color for header and record button
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val accentColor = getColor(android.R.color.system_accent1_200)
+            binding.collapsingToolbar.setExpandedTitleColor(accentColor)
+            binding.collapsingToolbar.setCollapsedTitleTextColor(accentColor)
         }
-        adapter.submitList(filtered)
-        updateEmptyState(filtered)
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -152,9 +130,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateToggleUi() {
         binding.btnToggleMic.setImageResource(if (useMic) R.drawable.ic_mic else R.drawable.ic_mic_off)
-        binding.btnToggleMic.alpha = if (useMic) 1.0f else 0.5f
+        binding.btnToggleMic.alpha = if (useMic) 1.0f else 0.4f
+
         binding.btnToggleSystemAudio.setImageResource(if (useSystemAudio) R.drawable.ic_audio else R.drawable.ic_audio_off)
-        binding.btnToggleSystemAudio.alpha = if (useSystemAudio) 1.0f else 0.5f
+        binding.btnToggleSystemAudio.alpha = if (useSystemAudio) 1.0f else 0.4f
     }
 
     private fun updateEmptyState(videos: List<VideoFile>) {
@@ -257,7 +236,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         allVideos = videos
-        applyFilter()
+        adapter.submitList(allVideos)
+        updateEmptyState(allVideos)
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -270,6 +250,15 @@ class MainActivity : AppCompatActivity() {
         }
         try { startActivity(intent) }
         catch (e: Exception) { Toast.makeText(this, "No video player found", Toast.LENGTH_SHORT).show() }
+    }
+
+    private fun shareVideo(video: VideoFile) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "video/mp4"
+            putExtra(Intent.EXTRA_STREAM, video.uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        startActivity(Intent.createChooser(intent, "Share video"))
     }
 
     private fun renameVideo(video: VideoFile) {

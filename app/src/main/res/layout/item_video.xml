@@ -1,110 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:app="http://schemas.android.com/apk/res-auto"
-     xmlns:tools="http://schemas.android.com/tools"
-     android:layout_height="wrap_content"
-     android:layout_width="match_parent"
-     android:layout_marginVertical="12dp"
-     android:layout_marginHorizontal="16dp"
-     app:cardElevation="8dp"
-     app:cardCornerRadius="24dp">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="14dp"
+    android:background="?android:attr/selectableItemBackground">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-         android:layout_height="250dp"
-         android:layout_width="match_parent">
+    <!-- Thumbnail with rounded corners -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/thumbnailCard"
+        android:layout_width="72dp"
+        android:layout_height="54dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageView
-             android:layout_height="match_parent"
-             android:layout_width="match_parent"
-             android:scaleType="centerCrop"
-             android:background="#1A1A1A"
-             android:id="@+id/thumbnail" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <!-- Gradient overlay -->
-        <View
-             android:layout_height="120dp"
-             android:layout_width="match_parent"
-             android:background="@drawable/gradient_bottom"
-             app:layout_constraintBottom_toBottomOf="parent" />
+            <ImageView
+                android:id="@+id/thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="?attr/colorSurfaceContainerHighest" />
 
-        <!-- Duration pill -->
-        <TextView
-             android:id="@+id/durationText"
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:layout_margin="16dp"
-             android:textSize="12sp"
-             android:textColor="#FFFFFF"
-             android:background="@drawable/bg_duration_pill"
-             android:paddingVertical="4dp"
-             android:paddingHorizontal="8dp"
-             android:fontFamily="sans-serif-medium"
-             app:layout_constraintTop_toTopOf="parent"
-             app:layout_constraintEnd_toEndOf="parent"
-             tools:text="04:22" />
+            <!-- Small play icon overlay -->
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_play"
+                app:tint="#CCFFFFFF" />
 
-        <!-- Title -->
-        <TextView
-             android:id="@+id/titleText"
-             android:layout_height="wrap_content"
-             android:layout_width="0dp"
-             android:layout_marginHorizontal="16dp"
-             android:layout_marginBottom="4dp"
-             android:ellipsize="end"
-             android:fontFamily="sans-serif-medium"
-             android:textSize="18sp"
-             android:textColor="#FFFFFF"
-             android:maxLines="1"
-             app:layout_constraintBottom_toTopOf="@id/dateSizeText"
-             app:layout_constraintStart_toStartOf="parent"
-             app:layout_constraintEnd_toStartOf="@id/btnMenu"
-             tools:text="Product Showcase Demo" />
+            <!-- Duration pill -->
+            <TextView
+                android:id="@+id/durationText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="3dp"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="1dp"
+                android:background="@drawable/bg_duration_pill"
+                android:textColor="@android:color/white"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-medium"
+                tools:text="04:22" />
+        </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <!-- Date / Size -->
-        <TextView
-             android:id="@+id/dateSizeText"
-             android:layout_height="wrap_content"
-             android:layout_width="0dp"
-             android:layout_marginHorizontal="16dp"
-             android:layout_marginBottom="16dp"
-             android:fontFamily="sans-serif"
-             android:textSize="12sp"
-             android:textColor="#B3FFFFFF"
-             android:letterSpacing="0.03"
-             app:layout_constraintBottom_toBottomOf="parent"
-             app:layout_constraintStart_toStartOf="parent"
-             app:layout_constraintEnd_toStartOf="@id/btnMenu"
-             tools:text="OCT 24, 2023  •  124 MB" />
+    <!-- Title -->
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="4dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:maxLines="1"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@+id/dateSizeText"
+        app:layout_constraintEnd_toStartOf="@+id/btnMenu"
+        app:layout_constraintStart_toEndOf="@+id/thumbnailCard"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="ScreenRecord_20260406" />
 
-        <!-- Menu Button -->
-        <ImageButton
-             android:id="@+id/btnMenu"
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:layout_marginEnd="8dp"
-             android:layout_marginBottom="16dp"
-             android:contentDescription="More options"
-             android:src="@android:drawable/ic_menu_more"
-             android:background="?android:attr/selectableItemBackgroundBorderless"
-             app:tint="#FFFFFF"
-             app:layout_constraintBottom_toBottomOf="parent"
-             app:layout_constraintEnd_toEndOf="parent" />
+    <!-- Date / Size subtitle -->
+    <TextView
+        android:id="@+id/dateSizeText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginTop="3dp"
+        android:fontFamily="sans-serif"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnMenu"
+        app:layout_constraintStart_toEndOf="@+id/thumbnailCard"
+        app:layout_constraintTop_toBottomOf="@+id/titleText"
+        tools:text="APR 6, 2026  •  28 MB" />
 
-        <!-- Centered Play Icon -->
-        <ImageView
-             android:layout_height="64dp"
-             android:layout_width="64dp"
-             android:scaleType="centerInside"
-             android:src="@android:drawable/ic_media_play"
-             android:background="@drawable/play_bg"
-             app:tint="#FFFFFF"
-             android:backgroundTint="#40000000"
-             app:layout_constraintTop_toTopOf="parent"
-             app:layout_constraintBottom_toBottomOf="parent"
-             app:layout_constraintStart_toStartOf="parent"
-             app:layout_constraintEnd_toEndOf="parent" />
+    <!-- More options button -->
+    <ImageButton
+        android:id="@+id/btnMenu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="More options"
+        android:src="@drawable/ic_more_vert"
+        app:tint="?attr/colorOnSurfaceVariant"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

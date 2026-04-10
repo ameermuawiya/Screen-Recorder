@@ -13,7 +13,8 @@ import java.util.Locale
 class VideoAdapter(
     private val onPlayClick: (VideoFile) -> Unit,
     private val onRenameClick: (VideoFile) -> Unit,
-    private val onDeleteClick: (VideoFile) -> Unit
+    private val onDeleteClick: (VideoFile) -> Unit,
+    private val onShareClick: (VideoFile) -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     private val videos = mutableListOf<VideoFile>()
@@ -80,9 +81,9 @@ class VideoAdapter(
 
             binding.btnMenu.setOnClickListener { view ->
                 val popup = androidx.appcompat.widget.PopupMenu(view.context, view)
-                popup.menu.add(0, 1, 0, "Play").setIcon(android.R.drawable.ic_media_play)
-                popup.menu.add(0, 2, 0, "Rename").setIcon(android.R.drawable.ic_menu_edit)
-                popup.menu.add(0, 3, 0, "Delete").setIcon(android.R.drawable.ic_menu_delete)
+                popup.menu.add(0, 1, 0, "Rename").setIcon(R.drawable.ic_rename)
+                popup.menu.add(0, 2, 0, "Share").setIcon(R.drawable.ic_share_modern)
+                popup.menu.add(0, 3, 0, "Delete").setIcon(R.drawable.ic_delete)
 
                 try {
                     val fieldMPopup = androidx.appcompat.widget.PopupMenu::class.java.getDeclaredField("mPopup")
@@ -95,8 +96,8 @@ class VideoAdapter(
 
                 popup.setOnMenuItemClickListener { item ->
                     when (item.itemId) {
-                        1 -> { onPlayClick(video); true }
-                        2 -> { onRenameClick(video); true }
+                        1 -> { onRenameClick(video); true }
+                        2 -> { onShareClick(video); true }
                         3 -> { onDeleteClick(video); true }
                         else -> false
                     }

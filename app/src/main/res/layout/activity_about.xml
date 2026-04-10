@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="8dp"
-                android:text="Version 3.0"
+                android:text="Version 3.1"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="14sp" />
 
