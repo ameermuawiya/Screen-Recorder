@@ -17,6 +17,22 @@
 
 <br>
 
+<div align="center">
+  <a href="https://apt.izzysoft.de/fdroid/index/apk/com.haseeb.recorder">
+    <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="60">
+  </a>
+  &nbsp;
+  <a href="https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder/releases">
+    <img src="https://img.shields.io/badge/GitHub-Releases-24292e?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Releases" height="60">
+  </a>
+  &nbsp;
+  <a href="obtainium://add/https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder">
+    <img src="https://img.shields.io/badge/Get_it_on-Obtainium-297ACC?style=for-the-badge&logo=android&logoColor=white" alt="Obtainium" height="60">
+  </a>
+</div>
+
+<br>
+
 A lightweight, native Android screen recording application built with Kotlin. It leverages Android's `MediaProjection` API and provides a beautiful, non-intrusive floating pill overlay inspired by Samsung's One UI design language.
 
 ## ✨ Features
