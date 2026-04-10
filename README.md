@@ -1,6 +1,20 @@
 <div align="center">
   <img src="app/logo.png" alt="ScreenRecorder Logo" width="128" />
   <h1>ScreenRecorder</h1>
+  
+  <a href="https://apt.izzysoft.de/fdroid/index/apk/com.haseeb.recorder">
+    <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="60">
+  </a>
+  &nbsp;
+  <a href="https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder/releases">
+    <img src="https://img.shields.io/badge/GitHub-Releases-24292e?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Releases" height="60">
+  </a>
+  &nbsp;
+  <a href="obtainium://add/https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder">
+    <img src="https://img.shields.io/badge/Get_it_on-Obtainium-297ACC?style=for-the-badge&logo=android&logoColor=white" alt="Obtainium" height="60">
+  </a>
+  <br><br>
+
   <p><b>A pristine Android screen recorder with a floating OneUI-style control pill.</b></p>
   <br>
   <p float="left" align="center">
@@ -13,22 +27,6 @@
     <img src="app/screenshots/Screenshot_20260323_160141_One%20UI%20Home.jpg" alt="Recording Pill Active" width="200" style="border-radius: 12px; margin: 4px;" />
     <img src="app/screenshots/Screenshot_20260323_160154_One%20UI%20Home.jpg" alt="Recording Complete" width="200" style="border-radius: 12px; margin: 4px;" />
   </p>
-</div>
-
-<br>
-
-<div align="center">
-  <a href="https://apt.izzysoft.de/fdroid/index/apk/com.haseeb.recorder">
-    <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="60">
-  </a>
-  &nbsp;
-  <a href="https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder/releases">
-    <img src="https://img.shields.io/badge/GitHub-Releases-24292e?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Releases" height="60">
-  </a>
-  &nbsp;
-  <a href="obtainium://add/https://github.com/muhammadhaseebiqbal-dev/Screen-Recorder">
-    <img src="https://img.shields.io/badge/Get_it_on-Obtainium-297ACC?style=for-the-badge&logo=android&logoColor=white" alt="Obtainium" height="60">
-  </a>
 </div>
 
 <br>
